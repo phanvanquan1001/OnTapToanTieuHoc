@@ -1,0 +1,54 @@
+<div class="container">
+  <h1> Ôn tập toán lớp 1 </h1>
+  <div class="float-right"> <fa-icon [icon]="faClock"></fa-icon> {{ ellapsedTime }} </div>
+  <br />
+  <div class="card">
+    <div class="card-header">
+      <h3> {{ quiz.name }} </h3>
+    </div>
+    <div class="card-body">
+      <blockquote class="blockquote mb-0">
+        <div *ngFor="let question of quiz.questions; let i = index">
+          <div *ngIf="question.questionTypeId === 1">
+            <div class="card-title">
+              <span class="badge badge-pill badge-info"> Câu {{ i + 1 }} </span>
+            </div>
+            <div class="card-text">
+              {{ question.name }}
+            </div>
+            <div class="custom-control custom-radio" *ngFor="let option of question.options">
+              <label class="container"> {{ option.name }}
+                <input type="radio" id="customRadio{{option.id}}" class="custom-control-input"
+                  [(ngModel)]="question.userAnswer" name="{{option.id}}" [value]="option.name">
+                <span class="checkmark"></span>
+              </label>
+            </div>
+
+          </div>
+          <div *ngIf="question.questionTypeId === 2">
+            <div *ngIf="question.questionTypeId === 2">
+              <span class="badge badge-pill badge-info"> Câu {{i + 1 }} </span>
+            </div>
+            <div class="form-group">
+              <label> {{question.name}} </label>
+              <br />
+              <div class="form-row">
+                <div class="col-4">
+                    Đáp án của bạn
+                </div>
+                <div class="col">
+                    <input class="form-control" type="text" [(ngModel)]="question.userAnswer" />
+                </div>
+              </div>
+            </div>
+          </div>
+          <hr />
+        </div>
+      </blockquote>
+      <div class="text-center">
+        <button class="btn btn-primary btn-space" (click)="onSubmit()"> Nộp bài </button>
+        <button class="btn btn-secondary btn-space" (click)="reset()"> Làm lại </button>
+      </div>
+    </div>
+  </div>
+</div>
