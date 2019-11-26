@@ -1,6 +1,7 @@
-<div class="container">
-  <h1> Ôn tập toán lớp 1 </h1>
-  <div class="float-right"> <fa-icon [icon]="faClock"></fa-icon> {{ ellapsedTime }} </div>
+<br/>
+<h1> Ôn tập toán lớp 1 </h1>
+<div *ngIf="isOpenQuizPage" class="container">
+  <div class="float-right"> <fa-icon [icon]="faClock"></fa-icon> {{ ellapsedCurrentTime }} / {{ ellapsedMaxTime }} </div>
   <br />
   <div class="card">
     <div class="card-header">
@@ -8,10 +9,10 @@
     </div>
     <div class="card-body">
       <blockquote class="blockquote mb-0">
-        <div *ngFor="let question of quiz.questions; let i = index">
+        <div *ngFor="let question of filteredQuestions; let i = index">
           <div *ngIf="question.questionTypeId === 1">
             <div class="card-title">
-              <span class="badge badge-pill badge-info"> Câu {{ i + 1 }} </span>
+              <span class="badge badge-pill badge-info"> Câu {{ pager.index + 1 }} </span>
             </div>
             <div class="card-text">
               {{ question.name }}
@@ -27,7 +28,7 @@
           </div>
           <div *ngIf="question.questionTypeId === 2">
             <div *ngIf="question.questionTypeId === 2">
-              <span class="badge badge-pill badge-info"> Câu {{i + 1 }} </span>
+              <span class="badge badge-pill badge-info"> Câu {{pager.index + 1 }} </span>
             </div>
             <div class="form-group">
               <label> {{question.name}} </label>
@@ -46,9 +47,41 @@
         </div>
       </blockquote>
       <div class="text-center">
-        <button class="btn btn-primary btn-space" (click)="onSubmit()"> Nộp bài </button>
-        <button class="btn btn-secondary btn-space" (click)="reset()"> Làm lại </button>
+              <button [disabled]="isFirstQuestion" class="btn btn-default" (click)="goTo(0);"> <fa-icon [icon]="faAngleDoubleLeft"></fa-icon> First</button>
+              <button [disabled]="checkPreviousQuestion" class="btn btn-default" (click)="goTo(pager.index - 1);"> <fa-icon [icon]="faAngleLeft"></fa-icon> Prev</button>
+              <button [disabled]="checkNextQuestion" class="btn btn-default" (click)="goTo(pager.index + 1);">Next <fa-icon [icon]="faAngleRight"></fa-icon> </button>
+              <button [disabled]="isLastQuestion" class="btn btn-default" (click)="goTo(pager.count - 1);">Last <fa-icon [icon]="faAngleDoubleRight"></fa-icon></button>
+      </div>
+      <br/>
+      <div class="text-center">
+        <button class="btn btn-primary btn-space" (click)="onSubmit()"> <fa-icon [icon]="faFile"></fa-icon> Nộp bài </button>
       </div>
     </div>
   </div>
+</div>
+
+<br/>
+
+<div *ngIf="!isOpenQuizPage" class="container">
+    <div class="card">
+          <div class="card-header">
+                  <h3> <fa-icon [icon]="faAward"></fa-icon> Hoàn tất bài ôn tập! </h3>
+          </div>
+          <div class="card-body">
+              <div class="row">
+                  <div class="col col-sm-4 col-lg-3">
+                          <img src="assets/img/trophy.png" width="100%" height="auto">
+                  </div>
+                  <div class="col col-sm-6">
+                          <h5> Số lượng câu đúng của bạn: {{ correctAnswers }} / {{ numberAnswers }} câu </h5>
+                          <h5> Thời gian hoàn thành {{ ellapsedCurrentTime }} </h5>
+                  </div>
+              </div>
+              <br/>
+              <div class="text-center">
+                      <button class="btn btn-secondary btn-space" (click)="reset()"> <fa-icon [icon]="faPen"></fa-icon> Làm lại </button>
+                      <button class="btn btn-success btn-space"> <fa-icon [icon]="faPaperPlane"></fa-icon> Gửi kết quả </button>
+              </div>
+          </div>
+    </div>
 </div>
