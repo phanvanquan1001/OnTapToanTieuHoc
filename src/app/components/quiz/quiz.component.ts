@@ -2,11 +2,14 @@ import { Component, OnInit } from '@angular/core';
 import {
   faClock,
   faFile, faPen, faPaperPlane, faAward,
-  faAngleDoubleLeft, faAngleLeft, faAngleRight, faAngleDoubleRight
+  faAngleDoubleLeft, faAngleLeft, faAngleRight, faAngleDoubleRight,
+  faEdit, faFileAlt, faArrowLeft, faTimes, faCheck
 } from '@fortawesome/free-solid-svg-icons';
 import Swal from 'sweetalert2';
 import { IQuiz } from 'src/app/models/IQuiz';
 import { IPager } from 'src/app/models/IPager';
+import { IQuestion } from 'src/app/models/IQuestion';
+import { QuizService } from 'src/app/services/quiz.service';
 @Component({
   selector: 'app-quiz',
   templateUrl: './quiz.component.html',
@@ -21,6 +24,7 @@ export class QuizComponent implements OnInit {
 
   maxtime: number;
   currentTime: number;
+  quizProgress: number;
   interval;
   ellapsedMaxTime = '00:00';
   ellapsedCurrentTime = '00:00';
@@ -32,23 +36,45 @@ export class QuizComponent implements OnInit {
   faClock = faClock;
   faPen = faPen;
   faFile = faFile;
+  faEdit = faEdit;
   faPaperPlane = faPaperPlane;
   faAward = faAward;
   faAngleDoubleLeft = faAngleDoubleLeft;
   faAngleLeft = faAngleLeft;
   faAngleRight = faAngleRight;
   faAngleDoubleRight = faAngleDoubleRight;
+  faFileAlt = faFileAlt;
+  faArrowLeft = faArrowLeft;
+  faTimes = faTimes;
+  faCheck = faCheck;
 
   // Page
   isOpenQuizPage: boolean;
+  isOpenReviewPage: boolean;
+  isOpenSubmitPage: boolean;
+  isOpenResultPage: boolean;
   pager: IPager;
 
-  constructor() { }
+  constructor(private quizService: QuizService) { }
 
   ngOnInit() {
+    this.quizService.get('data/lop1/giuaky1-de1.json').subscribe(res => {
+      this.quiz = res;
+
+      this.shuffle(this.quiz.questions);
+      this.shuffleOption(this.quiz.questions);
+      this.numberAnswers = this.quiz.questions.length;
+      this.pager.count = this.numberAnswers;
+      this.start();
+    });
+
     this.currentTime = 0;
+    this.quizProgress = 0;
     this.maxtime = 60;
     this.isOpenQuizPage = true;
+    this.isOpenReviewPage = false;
+    this.isOpenSubmitPage = false;
+    this.isOpenResultPage = false;
     this.ellapsedMaxTime = this.parseTime(this.maxtime);
     this.ellapsedCurrentTime = this.parseTime(this.currentTime);
     this.isActiveStart = true;
@@ -59,248 +85,6 @@ export class QuizComponent implements OnInit {
       size: 1,
       count: 1
     };
-    this.quiz = {
-      id: 1,
-      name: 'Ôn tập giữa học kỳ 1',
-      description: 'this is my quiz',
-      questions: [
-        {
-          id: 1,
-          name: '1 + 1 = ...',
-          questionTypeId: 2,
-          correctAnswer: '2',
-          userAnswer: ''
-        },
-        {
-          id: 2,
-          name: '1 + 5 = ...',
-          questionTypeId: 2,
-          correctAnswer: '6',
-          userAnswer: ''
-        },
-        {
-          id: 3,
-          name: '5 + 5 = ...',
-          questionTypeId: 1,
-          options: [
-            {
-              id: 1,
-              questionId: 3,
-              name: '9',
-              isAnswer: false
-            },
-            {
-              id: 2,
-              questionId: 3,
-              name: '10',
-              isAnswer: true
-            },
-            {
-              id: 3,
-              questionId: 3,
-              name: '11',
-              isAnswer: false
-            },
-            {
-              id: 4,
-              questionId: 3,
-              name: '12',
-              isAnswer: false
-            }]
-        },
-        {
-          id: 4,
-          name: '5 + 4 ... 4 + 5',
-          questionTypeId: 1,
-          options: [
-            {
-              id: 5,
-              questionId: 4,
-              name: '>',
-              isAnswer: false
-            },
-            {
-              id: 6,
-              questionId: 4,
-              name: '=',
-              isAnswer: true
-            },
-            {
-              id: 7,
-              questionId: 4,
-              name: '<',
-              isAnswer: false
-            }]
-        },
-        {
-          id: 5,
-          name: '10 - 6 = ...',
-          questionTypeId: 2,
-          correctAnswer: '4',
-          userAnswer: ''
-        },
-        {
-          id: 6,
-          name: '3 + 6 = ...',
-          questionTypeId: 2,
-          correctAnswer: '9',
-          userAnswer: ''
-        },
-        {
-          id: 7,
-          name: '6 + ... = 9',
-          questionTypeId: 2,
-          correctAnswer: '3',
-          userAnswer: ''
-        },
-        {
-          id: 8,
-          name: '9 - 4 + 5 = ...',
-          questionTypeId: 2,
-          correctAnswer: '10',
-          userAnswer: ''
-        },
-        {
-          id: 9,
-          name: '3 ... 4',
-          questionTypeId: 2,
-          correctAnswer: '<',
-          userAnswer: ''
-        },
-        {
-          id: 10,
-          name: '3 < ... < 5',
-          questionTypeId: 2,
-          correctAnswer: '4',
-          userAnswer: ''
-        },
-        {
-          id: 11,
-          name: '3 + 2 ... 5',
-          questionTypeId: 1,
-          options: [
-            {
-              id: 8,
-              questionId: 11,
-              name: '>',
-              isAnswer: false
-            },
-            {
-              id: 9,
-              questionId: 11,
-              name: '=',
-              isAnswer: true
-            },
-            {
-              id: 10,
-              questionId: 11,
-              name: '<',
-              isAnswer: false
-            }]
-        },
-        {
-          id: 12,
-          name: 'Số lớn nhất trong các số: 2, 5, 7, 9 là:',
-          questionTypeId: 1,
-          options: [
-            {
-              id: 11,
-              questionId: 12,
-              name: '2',
-              isAnswer: false
-            },
-            {
-              id: 12,
-              questionId: 12,
-              name: '5',
-              isAnswer: false
-            },
-            {
-              id: 13,
-              questionId: 12,
-              name: '7',
-              isAnswer: false
-            },
-            {
-              id: 14,
-              questionId: 12,
-              name: '9',
-              isAnswer: true
-            }]
-        },
-        {
-          id: 13,
-          name: 'Số lớn nhất trong các số: 7, 4, 8, 6 là:',
-          questionTypeId: 1,
-          options: [
-            {
-              id: 15,
-              questionId: 13,
-              name: '7',
-              isAnswer: false
-            },
-            {
-              id: 16,
-              questionId: 13,
-              name: '4',
-              isAnswer: false
-            },
-            {
-              id: 17,
-              questionId: 13,
-              name: '6',
-              isAnswer: false
-            },
-            {
-              id: 18,
-              questionId: 13,
-              name: '8',
-              isAnswer: true
-            }]
-        },
-        {
-          id: 14,
-          name: 'Dãy các số theo thứ tự từ 0 đến 10',
-          questionTypeId: 1,
-          options: [
-            {
-              id: 19,
-              questionId: 14,
-              name: '0, 1, 2, 3, 4, 5, 6, 7, 8 ,9, 10',
-              isAnswer: true
-            },
-            {
-              id: 20,
-              questionId: 14,
-              name: '0, 1, 2, 3, 4, 7, 6, 5, 8, 9, 10',
-              isAnswer: false
-            },
-            {
-              id: 21,
-              questionId: 14,
-              name: '0, 2, 1, 3, 4, 5, 6, 7, 8, 9, 10',
-              isAnswer: false
-            },
-            {
-              id: 22,
-              questionId: 14,
-              name: '0, 1, 2, 7, 4, 5, 6, 8, 3, 9, 10',
-              isAnswer: false
-            }]
-        },
-        {
-            id: 15,
-            name: '7 + 1 = ...',
-            questionTypeId: 2,
-            correctAnswer: '8',
-            userAnswer: ''
-        }]
-    };
-
-    this.shuffle(this.quiz.questions);
-    this.numberAnswers = this.quiz.questions.length;
-    this.pager.count = this.numberAnswers;
-    this.start();
   }
 
   // Handle event when user clicked button Nop bai
@@ -330,6 +114,9 @@ export class QuizComponent implements OnInit {
   submitQuiz() {
     this.isSubmit = true;
     this.isOpenQuizPage = false;
+    this.isOpenReviewPage = false;
+    this.isOpenSubmitPage = true;
+    this.isOpenResultPage = false;
     this.isActivePause = false;
     this.isActiveReset = true;
     clearInterval(this.interval);
@@ -416,14 +203,37 @@ export class QuizComponent implements OnInit {
     this.start();
   }
 
-  // Shuffle questions on quiz
-  shuffle(listQuestions) {
+  onReview() {
+    this.isOpenReviewPage = true;
+    this.isOpenSubmitPage = false;
+    this.isOpenResultPage = false;
+    this.isOpenQuizPage = false;
+  }
+
+  // Shuffle questions and answer on quiz
+  shuffle(listQuestions: IQuestion[]) {
     for (let i = listQuestions.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       const x = listQuestions[i];
       listQuestions[i] = listQuestions[j];
       listQuestions[j] = x;
     }
+
+    return listQuestions;
+  }
+
+  // Shuffle option of quiz
+  shuffleOption(listQuestions: IQuestion[]) {
+    listQuestions.forEach(question => {
+      if (question.questionTypeId === 1) {
+        for (let option = question.options.length - 1; option > 0; option--) {
+          const j = Math.floor(Math.random() * (option + 1));
+          const temp = question.options[option];
+          question.options[option] = question.options[j];
+          question.options[j] = temp;
+        }
+      }
+    });
 
     return listQuestions;
   }
@@ -449,8 +259,31 @@ export class QuizComponent implements OnInit {
   }
 
   goTo(index: number) {
+    this.isOpenQuizPage = true;
+    this.isOpenReviewPage = false;
+    this.isOpenSubmitPage = false;
+    this.isOpenResultPage = false;
+
     if (index >= 0 && index < this.pager.count) {
       this.pager.index = index;
     }
+    this.quizProgress = ((this.pager.index + 1) * 100) / (this.pager.count);
+    console.log(this.quizProgress);
+  }
+
+  goToResultPage() {
+    this.isOpenResultPage = true;
+  }
+
+  displayResult(question: IQuestion) {
+    let result = false;
+
+    question.options.forEach(option => {
+      if (question.userAnswer === option.name && option.isAnswer) {
+        result = true;
+      }
+    });
+
+    return result;
   }
 }
